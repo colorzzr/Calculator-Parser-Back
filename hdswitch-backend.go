@@ -4,7 +4,7 @@ import (
 	"github.com/freeznet/tomato"
 	"github.com/freeznet/tomato/config"
 	"fmt"
-	_ "github.com/freeznet/hdswitch-backend/controller"
+	//_ "github.com/freeznet/hdswitch-backend/controller"
 )
 
 func main() {
