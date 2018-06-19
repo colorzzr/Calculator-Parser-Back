@@ -4,11 +4,13 @@ import (
 	"github.com/freeznet/tomato"
 	"github.com/freeznet/tomato/config"
 	"fmt"
-	//_ "github.com/freeznet/hdswitch-backend/controller"
+	"hdswitch-backend/controller"
 )
 
 func main() {
-	tomato.Run()
+	controller.Init()
+
+	//tomato.Run()
 }
 
 func initLiveQueryServer() {
