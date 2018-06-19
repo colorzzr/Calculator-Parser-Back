@@ -87,6 +87,7 @@ func (e ExtendSchemaAPI) getSpecificClass(className string) (ClassFieldInfo, err
 	return ClassFieldInfo{}, errors.New("Cannot Find Class");
 }
 
+
 func (c ClassFieldInfo) printClassFieldInfo(){
 	fmt.Println("------");
 	fmt.Println("Class Name:", c.ClassName);
