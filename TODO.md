@@ -1,0 +1,2 @@
+	-	ini file cannot have "type" as field
+	-	check the parse interface recieve the data change inside the "_SCHEMA"

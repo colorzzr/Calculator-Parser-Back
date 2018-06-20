@@ -8,22 +8,89 @@ import (
 	"github.com/freeznet/tomato/orm"
 	"github.com/go-ini/ini"
 	"errors"
+	"encoding/json"
 )
 
-func Init(){
+func init(){
 	schemaExtendInit()
+	//
+	//fmt.Println("------");
+	//var e ExtendSchemaAPI;
+	//e.getAllClass();
+	//
+	//orm.TomatoDBController.Update()
+	//orm.Adapter.
+	//
+	//
+	//fmt.Println("------");
+	//
+	//r,_ := e.getSpecificClass("GameScore");
+	//r.printClassFieldInfo();
+	//
+	//fmt.Println("------");
+	//
+	//b,_ := e.getAllClassInJson();
+	//
+	//fmt.Println(string(b))
+	//
+	//b, _ = e.getSpecificClassInJson("GameScore")
+	//
+	//fmt.Println(string(b));
 
-	fmt.Println("------");
-	var e ExtendSchemaAPI;
-	e.getAllClass();
 
-	fmt.Println("------");
 
-	r,_ :=e.getSpecificClass("GameScore");
-	r.printClassFieldInfo();
+	//fmt.Println("------")
+	//class := types.M{
+	//	"fields" : types.M{
+	//		"key": types.M{"type": "String"},
+	//	},
+	//}
+	//className := "user";
+	//
+	//adap := postgres.NewPostgresAdapter("tomato", storage.OpenPostgreSQL());
+	//
+	//adap.DeleteClass(className);
+	//
+	//var classLevelPermissions types.M;
+	//classLevelPermissions = nil;
+	//
+	//adap.CreateClass(className, class);
+	//
+	//obj := types.M{
+	//	"key" : "adfasf",
+	//}
+	//orm.Adapter.CreateObject(className,class, obj);
+	////orm.Adapter.AddFieldIfNotExists(className, "ccc", types.M{
+	////	"type":"String",
+	////	"ex":"sdfaas",
+	////})
+	//
+	////newSchema := types.M{
+	////			"type": "String",
+	////			"subName": "cccc",
+	////}
+	//////
+	//////
+	//schema := orm.TomatoDBController.LoadSchema(nil);
+	//
+	//result, err := schema.UpdateClass(className, nil, classLevelPermissions);
+	//fmt.Println(result);
+	//fmt.Println(err);
+
+
+	//
+	//fmt.Println("------");
+	//err = adap.UpdateFields(className, "key1", newSchema);
+	//fmt.Println(err);
 }
 
 
+func TestAdd(){
+	//r, e := orm.Adapter.GetClass("Alert");
+	//
+	//fmt.Println(e);
+	//fmt.Println(r);
+}
 
 
 type ExtendSchemaAPI struct {
@@ -87,13 +154,36 @@ func (e ExtendSchemaAPI) getSpecificClass(className string) (ClassFieldInfo, err
 	return ClassFieldInfo{}, errors.New("Cannot Find Class");
 }
 
+//for http request convert all class info into json
+func (e ExtendSchemaAPI) getAllClassInJson()([]byte, error){
+	allClass, err := e.getAllClass();
+	if err != nil{
+		return nil, err;
+	}
+
+	b,_ := json.Marshal(allClass);
+
+	return b, nil;
+}
+
+//for http request convert specific class info into json
+func (e ExtendSchemaAPI) getSpecificClassInJson(className string)([]byte, error){
+	classInfo, err := e.getSpecificClass(className);
+	if err != nil{
+		return nil, err;
+	}
+
+	b,_ := json.Marshal(classInfo);
+	return b, nil;
+}
+
 func (c ClassFieldInfo) printClassFieldInfo(){
 	fmt.Println("------");
 	fmt.Println("Class Name:", c.ClassName);
 	printMap(c.Fields);
 }
 
-
+//initialize the extended field
 func schemaExtendInit(){
 	fmt.Println("------");
 
@@ -121,7 +211,7 @@ func schemaExtendInit(){
 
 	//check if it exist
 	if Adap.ClassExists("SCHEMA_EXTEND1"){
-		fmt.Println("test");
+		fmt.Println("GET!");
 	}else{
 		fmt.Println("Fail");
 	}
@@ -143,12 +233,14 @@ func schemaExtendInit(){
 	fmt.Println(len(schema));
 	for i := 0; i < len(schema); i++{
 		//forming the ini for specific class
-		path := "./extended_schema_configure/" + schema[i]["className"].(string) + ".ini";
-		fmt.Println(path);
+		path := "./controller/extended_schema_configure/" + schema[i]["className"].(string) + ".ini";
+		//fmt.Println(path);
 
 		aa,err := ini.Load(path);
+		//fmt.Println(err)
 		//if there is external requirement
 		if err == nil{
+			fmt.Println(path);
 			allSecs := aa.Sections();
 
 			//add all external fields
@@ -163,6 +255,14 @@ func schemaExtendInit(){
 			"schema": schema[i],
 			"isParseClass": schema[i]["isPaarseClass"],
 		})
+
+		//update into the _Schema
+		Adap.UpdateFields(schema[i]["className"].(string), types.M{
+			"className": schema[i]["className"],
+			"schema": schema[i],
+			"isParseClass": schema[i]["isPaarseClass"],
+		})
+
 		fmt.Println();
 	}
 

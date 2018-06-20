@@ -8,10 +8,12 @@ import (
 )
 
 func main() {
-	controller.Init()
+	controller.TestAdd();
 
 	//tomato.Run()
+	//beego.Run();
 }
+
 
 func initLiveQueryServer() {
 	args := map[string]string{}
