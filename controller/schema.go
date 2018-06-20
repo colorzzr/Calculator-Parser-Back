@@ -154,6 +154,7 @@ func (e ExtendSchemaAPI) getSpecificClass(className string) (ClassFieldInfo, err
 	return ClassFieldInfo{}, errors.New("Cannot Find Class");
 }
 
+<<<<<<< HEAD
 //for http request convert all class info into json
 func (e ExtendSchemaAPI) getAllClassInJson()([]byte, error){
 	allClass, err := e.getAllClass();
@@ -176,6 +177,8 @@ func (e ExtendSchemaAPI) getSpecificClassInJson(className string)([]byte, error)
 	b,_ := json.Marshal(classInfo);
 	return b, nil;
 }
+=======
+>>>>>>> 0943b86c38eac4a2485c41c5e835f74abd31b890
 
 func (c ClassFieldInfo) printClassFieldInfo(){
 	fmt.Println("------");
