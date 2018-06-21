@@ -8,9 +8,9 @@ import (
 )
 
 func main() {
-	controller.TestAdd();
+	controller.Init();
 
-	//tomato.Run()
+	tomato.Run()
 	//beego.Run();
 }
 

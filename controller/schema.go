@@ -11,85 +11,9 @@ import (
 	"encoding/json"
 )
 
-func init(){
-	schemaExtendInit()
-	//
-	//fmt.Println("------");
-	//var e ExtendSchemaAPI;
-	//e.getAllClass();
-	//
-	//orm.TomatoDBController.Update()
-	//orm.Adapter.
-	//
-	//
-	//fmt.Println("------");
-	//
-	//r,_ := e.getSpecificClass("GameScore");
-	//r.printClassFieldInfo();
-	//
-	//fmt.Println("------");
-	//
-	//b,_ := e.getAllClassInJson();
-	//
-	//fmt.Println(string(b))
-	//
-	//b, _ = e.getSpecificClassInJson("GameScore")
-	//
-	//fmt.Println(string(b));
+func Init(){
+	schemaExtendInit();
 
-
-
-	//fmt.Println("------")
-	//class := types.M{
-	//	"fields" : types.M{
-	//		"key": types.M{"type": "String"},
-	//	},
-	//}
-	//className := "user";
-	//
-	//adap := postgres.NewPostgresAdapter("tomato", storage.OpenPostgreSQL());
-	//
-	//adap.DeleteClass(className);
-	//
-	//var classLevelPermissions types.M;
-	//classLevelPermissions = nil;
-	//
-	//adap.CreateClass(className, class);
-	//
-	//obj := types.M{
-	//	"key" : "adfasf",
-	//}
-	//orm.Adapter.CreateObject(className,class, obj);
-	////orm.Adapter.AddFieldIfNotExists(className, "ccc", types.M{
-	////	"type":"String",
-	////	"ex":"sdfaas",
-	////})
-	//
-	////newSchema := types.M{
-	////			"type": "String",
-	////			"subName": "cccc",
-	////}
-	//////
-	//////
-	//schema := orm.TomatoDBController.LoadSchema(nil);
-	//
-	//result, err := schema.UpdateClass(className, nil, classLevelPermissions);
-	//fmt.Println(result);
-	//fmt.Println(err);
-
-
-	//
-	//fmt.Println("------");
-	//err = adap.UpdateFields(className, "key1", newSchema);
-	//fmt.Println(err);
-}
-
-
-func TestAdd(){
-	//r, e := orm.Adapter.GetClass("Alert");
-	//
-	//fmt.Println(e);
-	//fmt.Println(r);
 }
 
 
@@ -154,7 +78,6 @@ func (e ExtendSchemaAPI) getSpecificClass(className string) (ClassFieldInfo, err
 	return ClassFieldInfo{}, errors.New("Cannot Find Class");
 }
 
-<<<<<<< HEAD
 //for http request convert all class info into json
 func (e ExtendSchemaAPI) getAllClassInJson()([]byte, error){
 	allClass, err := e.getAllClass();
@@ -177,8 +100,6 @@ func (e ExtendSchemaAPI) getSpecificClassInJson(className string)([]byte, error)
 	b,_ := json.Marshal(classInfo);
 	return b, nil;
 }
-=======
->>>>>>> 0943b86c38eac4a2485c41c5e835f74abd31b890
 
 func (c ClassFieldInfo) printClassFieldInfo(){
 	fmt.Println("------");
@@ -253,22 +174,23 @@ func schemaExtendInit(){
 
 		printTypesM(schema[i]);
 		//mark the class name, fields, insert object
-		Adap.CreateObject("SCHEMA_EXTEND1", ss, types.M{
-			"className": schema[i]["className"],
-			"schema": schema[i],
-			"isParseClass": schema[i]["isPaarseClass"],
-		})
+		//Adap.CreateObject("SCHEMA_EXTEND1", ss, types.M{
+		//	"className": schema[i]["className"],
+		//	"schema": schema[i],
+		//	"isParseClass": schema[i]["isParseClass"],
+		//})
 
 		//update into the _Schema
-		Adap.UpdateFields(schema[i]["className"].(string), types.M{
-			"className": schema[i]["className"],
-			"schema": schema[i],
-			"isParseClass": schema[i]["isPaarseClass"],
-		})
+		Adap.UpdateFields(schema[i]["className"].(string), schema[i]);
 
 		fmt.Println();
 	}
 
+	d = orm.TomatoDBController.LoadSchema(nil);
+
+	schema,_ = d.GetAllClasses(nil);
+
+	fmt.Println(schema);
 	//close adapter
 	Adap.HandleShutdown();
 }
@@ -308,14 +230,14 @@ func addSubName(subName string, targetField string, field types.M)  {
 
 
 //add new {newTypeName:newTypeVals} field to the specific column of schema
-func addNewField(OriginCol string,newTypeName string, newTypeVals string, input types.M)  {
+func addNewField(OriginCol string, newTypeName string, newTypeVals string, input types.M)  {
 	//if user want to add the feature to the column which does not exist
 	if input[OriginCol] == nil{
-		panic("Column Does Not Exist!")
+		panic("Column " + OriginCol+ " Does Not Exist!")
 	}
 
 	//then assign the values to the keys
-	input[OriginCol].(types.M)[newTypeName] = newTypeVals;
+	input[OriginCol].(map[string]interface {})[newTypeName] = newTypeVals;
 }
 
 func checkErr(err error) {
