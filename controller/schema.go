@@ -64,6 +64,7 @@ func SchemaExtendInit(){
 
 			//printTypesM(schema[i]);
 			//update into the _Schema
+			fmt.Println(schema[i]);
 			err = orm.Adapter.UpdateFields(schema[i]["className"].(string), schema[i]);
 			if err != nil{
 				log.Println(err);

@@ -143,3 +143,82 @@ func Test_ExSchemaInit(t *testing.T){
 	Adap.HandleShutdown();
 	t.Log("Finish");
 }
+
+func Test_UpdateFields(t *testing.T){
+	Adap := postgres.NewPostgresAdapter("tomato", storage.OpenPostgreSQL());
+	ss := types.M{
+		"fields": types.M{
+			"Name": types.M{"type": "String"},
+		},
+	}
+	//create the test case
+	test := []struct{
+		name string;
+		arg types.M;
+		want types.M;
+	}{
+		{
+			name:"test1",
+			arg:types.M{
+				"fields":types.M{
+					"className":"test1",
+					"schema": "cccc",
+					"isParseClass":true,
+				},
+			},
+		}, {
+			name:"test2",
+			arg:types.M{
+				"fields":types.M{
+					"className":"test2",
+					"schema": types.M{
+						"type":"String",
+					},
+					"isParseClass":true,
+				},
+			},
+		},{
+			name:"test3",
+			arg:types.M{
+				"fields":types.M{
+					"className":"test3",
+					"schema": types.M{
+						"type":"String",
+						"subName":"ccc",
+					},
+					"isParseClass":true,
+				},
+			},
+		},{
+			name:"test4",
+			arg:types.M{
+				"fields":types.M{
+					"className":"notExist",
+					"schema": types.M{
+						"type":"String",
+						"subName":"ccc",
+					},
+					"isParseClass":true,
+				},
+			},
+		},
+	}
+	fmt.Println(test);
+
+
+	for _, tt := range test{
+		Adap.CreateClass(tt.name, ss);
+		Adap.UpdateFields(tt.name, tt.arg);
+		result,_ := Adap.GetClass(tt.name);
+
+		if reflect.DeepEqual(result["fields"], tt.arg){
+			t.Errorf("%q. PostgresAdapter.PerformInitialization() error = %v, wantErr %v", tt.name, result["fields"], tt.arg);
+		}
+
+		
+		orm.Adapter.DeleteClass(tt.name);
+	//	fmt.Println();
+	}
+
+	Adap.HandleShutdown();
+}
