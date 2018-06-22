@@ -2,211 +2,107 @@ package controller
 
 import (
 	"fmt"
-	"github.com/freeznet/tomato/storage/postgres"
-	"github.com/freeznet/tomato/storage"
 	"github.com/freeznet/tomato/types"
 	"github.com/freeznet/tomato/orm"
 	"github.com/go-ini/ini"
 	"errors"
 	"encoding/json"
+	"github.com/freeznet/tomato/utils"
+	"log"
 )
 
 func Init(){
-	schemaExtendInit();
-
+	SchemaExtendInit();
 }
 
-
-type ExtendSchemaAPI struct {
-
-}
-
-type ClassFieldInfo struct {
-	ClassName string;
-	Fields types.M;
-	//classLevelPermissions types.M;
-}
-
-
-//get all class description under extend schema
-func (e ExtendSchemaAPI) getAllClass() ([]ClassFieldInfo, error) {
-	//return e.Adap.GetClass("SCHEMA_EXTEND1");
-	result, err := orm.Adapter.Find("SCHEMA_EXTEND1", types.M{
-		"fields": types.M{
-			"className": types.M{"type": "String"},
-			"schema": types.M{"type": "Object"},
-			"isParseClass": types.M{"type": "Boolean"},
-		},
-	},nil, nil);
-
-	var allClass = make([]ClassFieldInfo, len(result));
-	for i:=0 ; i < len(result); i++{
-		allClass[i] = ClassFieldInfo{
-			ClassName: result[i]["className"].(string),
-			Fields: result[i]["schema"].(types.M)["fields"].(map[string]interface {}),
-		}
-
-		allClass[i].printClassFieldInfo();
-	}
-
-	return allClass,err;
-}
-
-//get the class fields by name
-func (e ExtendSchemaAPI) getSpecificClass(className string) (ClassFieldInfo, error) {
-	result, _ := orm.Adapter.Find("SCHEMA_EXTEND1", types.M{
-		"fields": types.M{
-			"className": types.M{"type": "String"},
-			"schema": types.M{"type": "Object"},
-			"isParseClass": types.M{"type": "Boolean"},
-		},
-	},nil, nil);
-
-	for i := 0 ; i < len(result); i++{
-		//get the object for each things
-		obj := result[i];
-
-		if obj["className"] == className{
-			return ClassFieldInfo{
-				ClassName: result[i]["className"].(string),
-				Fields: result[i]["schema"].(types.M)["fields"].(map[string]interface {}),
-			}, nil;
-		}
-
-	}
-
-	return ClassFieldInfo{}, errors.New("Cannot Find Class");
-}
-
-//for http request convert all class info into json
-func (e ExtendSchemaAPI) getAllClassInJson()([]byte, error){
-	allClass, err := e.getAllClass();
-	if err != nil{
-		return nil, err;
-	}
-
-	b,_ := json.Marshal(allClass);
-
-	return b, nil;
-}
-
-//for http request convert specific class info into json
-func (e ExtendSchemaAPI) getSpecificClassInJson(className string)([]byte, error){
-	classInfo, err := e.getSpecificClass(className);
-	if err != nil{
-		return nil, err;
-	}
-
-	b,_ := json.Marshal(classInfo);
-	return b, nil;
-}
-
-func (c ClassFieldInfo) printClassFieldInfo(){
-	fmt.Println("------");
-	fmt.Println("Class Name:", c.ClassName);
-	printMap(c.Fields);
-}
-
-//initialize the extended field
-func schemaExtendInit(){
-	fmt.Println("------");
-
-	//create a new adapter for postgres
-	Adap := postgres.NewPostgresAdapter("tomato", storage.OpenPostgreSQL());
-	//delete class first
-	Adap.DeleteClass("SCHEMA_EXTEND1");
-
-
+func makeCopyOfSchema(){
 	//set up the fields(columns) for extended schema
 	ss := types.M{
 		"fields": types.M{
 			"className": types.M{"type": "String"},
-			"schema": types.M{"type": "Object"},
-			"isParseClass": types.M{"type": "Boolean"},
+			"schema": types.M{"type": "String"},
 		},
 	}
-
 	//create the extended schema if it is not exist
-	_, err := Adap.CreateClass("SCHEMA_EXTEND1", ss);
-	fmt.Println(err);
-
-	fmt.Println("------");
-
-
-	//check if it exist
-	if Adap.ClassExists("SCHEMA_EXTEND1"){
-		fmt.Println("GET!");
-	}else{
-		fmt.Println("Fail");
-	}
-
-	//fetch the class
-	result, _ := Adap.GetClass("SCHEMA_EXTEND1");
-
-	fmt.Println(result);
-	fmt.Println(err);
-
-
-	fmt.Println("------");
+	orm.Adapter.CreateClass("SchemaExtend", ss);
 
 	//get the schema data
 	d := orm.TomatoDBController.LoadSchema(nil);
-
 	schema,_ := d.GetAllClasses(nil);
 
-	fmt.Println(len(schema));
 	for i := 0; i < len(schema); i++{
-		//forming the ini for specific class
-		path := "./controller/extended_schema_configure/" + schema[i]["className"].(string) + ".ini";
-		//fmt.Println(path);
+		b, _ := json.Marshal(schema[i]);
+		//mark the class name, fields, insert object
+		fmt.Println(orm.Adapter.CreateObject("SchemaExtend", ss, types.M{
+			"className": schema[i]["className"],
+			"schemaExtend": string(b),
+		}));
+	}
+}
 
-		aa,err := ini.Load(path);
-		//fmt.Println(err)
+//initialize the extended field
+func SchemaExtendInit(){
+	fmt.Println("------");
+	fmt.Println("Initial the SchemaExtend...");
+	//get the schema data
+	d := orm.TomatoDBController.LoadSchema(nil);
+
+	//looping through all existing
+	schema,_ := d.GetAllClasses(nil);
+	for i := 0; i < len(schema); i++{
+		//forming the ini path for specific class
+		path := "./controller/extended_schema_configure/" + schema[i]["className"].(string) + ".ini";
+
+		iniFile,err := ini.Load(path);
 		//if there is external requirement
 		if err == nil{
 			fmt.Println(path);
-			allSecs := aa.Sections();
+			allSecs := iniFile.Sections();
 
 			//add all external fields
-			loadExFiels(allSecs, schema[i]);
+			loadExFiels(allSecs, schema[i]["fields"].(types.M));
+
+			//printTypesM(schema[i]);
+			//update into the _Schema
+			err = orm.Adapter.UpdateFields(schema[i]["className"].(string), schema[i]);
+			if err != nil{
+				log.Println(err);
+			}
 		}
-
-
-		printTypesM(schema[i]);
-		//mark the class name, fields, insert object
-		//Adap.CreateObject("SCHEMA_EXTEND1", ss, types.M{
-		//	"className": schema[i]["className"],
-		//	"schema": schema[i],
-		//	"isParseClass": schema[i]["isParseClass"],
-		//})
-
-		//update into the _Schema
-		Adap.UpdateFields(schema[i]["className"].(string), schema[i]);
-
-		fmt.Println();
 	}
-
-	d = orm.TomatoDBController.LoadSchema(nil);
-
-	schema,_ = d.GetAllClasses(nil);
-
-	fmt.Println(schema);
-	//close adapter
-	Adap.HandleShutdown();
+	fmt.Println("-------");
 }
 
-func loadExFiels(allSection []*ini.Section, input types.M){
+//function loading all section inside ini file and add new field type
+func loadExFiels(allSection []*ini.Section, input types.M) {
 	//looping all columns
 	for i:=0; i < len(allSection); i++{
+		if allSection[i].Name() == "DEFAULT"{continue;}
+
 		allKeyVals := allSection[i].Keys();
 		allKeyStr := allSection[i].KeyStrings();
 
+		/********************************************************
+		 * create new map for overwrite original one			*
+		 * cos if user remove the newfield in the .ini file		*
+		 * but new schema would still have it					*
+		 ********************************************************/
+		//if user want to add the feature to the column which does not exist
+		if input[allSection[i].Name()] == nil{
+			panic(errors.New("Column " + allSection[i].Name() + " Does Not Exist!"));
+
+		}
+		emptyMap := types.M{
+			"type" : utils.M(input[allSection[i].Name()])["type"],
+		}
+		input[allSection[i].Name()] = emptyMap;
+		fmt.Println(input);
 		//looping all new fields
 		for j:=0; j < len(allKeyStr); j++{
-			fmt.Println(allKeyStr[j], allKeyVals[j]);
-			//input[allSection[i].].(types.M)[targetField].(types.M)["subName"] = subName;
-			addNewField(allSection[i].Name(), allKeyStr[j], allKeyVals[j].String(), input["fields"].(types.M));
+			err := addNewField(allSection[i].Name(), allKeyStr[j], allKeyVals[j].String(), input);
+			checkErr(err);
 		}
+		fmt.Println();
 	}
 }
 
@@ -220,24 +116,22 @@ func printTypesM(input types.M)  {
 	fmt.Println(input["fields"]);
 	fmt.Println(input["className"]);
 	fmt.Println(input["classLevelPermissions"]);
+	fmt.Println();
 }
-
-func addSubName(subName string, targetField string, field types.M)  {
-	field["fields"].(types.M)[targetField].(types.M)["subName"] = subName;
-	//fmt.Println(field["fields"].(types.M));
-	fmt.Println(field["fields"].(types.M)[targetField])
-}
-
 
 //add new {newTypeName:newTypeVals} field to the specific column of schema
-func addNewField(OriginCol string, newTypeName string, newTypeVals string, input types.M)  {
-	//if user want to add the feature to the column which does not exist
-	if input[OriginCol] == nil{
-		panic("Column " + OriginCol+ " Does Not Exist!")
+func addNewField(OriginCol string, newTypeName string, newTypeVals string, input types.M) error {
+	//cannot modify the default column
+	if OriginCol == "objectId" ||OriginCol == "ACL" ||OriginCol == "createdAt" ||OriginCol == "updatedAt"{
+		return errors.New(OriginCol + "is Default Column Cannot Modify");
+	}else if newTypeName == "type" {
+		return errors.New("Cannot Modify the property 'type'");
 	}
 
 	//then assign the values to the keys
-	input[OriginCol].(map[string]interface {})[newTypeName] = newTypeVals;
+	temp := utils.M(input[OriginCol]);
+	temp[newTypeName] = newTypeVals;
+	return nil;
 }
 
 func checkErr(err error) {
