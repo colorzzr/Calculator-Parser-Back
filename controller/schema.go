@@ -90,19 +90,20 @@ func loadExFiels(allSection []*ini.Section, input types.M) {
 		//if user want to add the feature to the column which does not exist
 		if input[allSection[i].Name()] == nil{
 			panic(errors.New("Column " + allSection[i].Name() + " Does Not Exist!"));
-
 		}
+
 		emptyMap := types.M{
 			"type" : utils.M(input[allSection[i].Name()])["type"],
 		}
 		input[allSection[i].Name()] = emptyMap;
-		fmt.Println(input);
+		//fmt.Println(input);
 		//looping all new fields
 		for j:=0; j < len(allKeyStr); j++{
+			//fmt.Println(allKeyStr[j], allKeyVals[j]);
 			err := addNewField(allSection[i].Name(), allKeyStr[j], allKeyVals[j].String(), input);
 			checkErr(err);
 		}
-		fmt.Println();
+		//fmt.Println();
 	}
 }
 
