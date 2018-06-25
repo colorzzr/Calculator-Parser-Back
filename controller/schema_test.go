@@ -152,7 +152,7 @@ func Test_UpdateFields(t *testing.T){
 		},
 	}
 	//create the test case
-	test := []struct{
+	test := []struct{ 
 		name string;
 		arg types.M;
 		want types.M;
@@ -215,7 +215,7 @@ func Test_UpdateFields(t *testing.T){
 			t.Errorf("%q. PostgresAdapter.PerformInitialization() error = %v, wantErr %v", tt.name, result["fields"], tt.arg);
 		}
 
-		
+
 		orm.Adapter.DeleteClass(tt.name);
 	//	fmt.Println();
 	}
