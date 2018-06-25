@@ -9,7 +9,6 @@ import (
 
 func main() {
 	controller.Init();
-
 	tomato.Run()
 	//beego.Run();
 }
