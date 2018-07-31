@@ -146,17 +146,17 @@ ALTER TABLE public."_Hooks" OWNER TO postgres;
 --
 
 CREATE TABLE public."_JobStatus" (
+    "jobName" text,
+    source text,
+    _rperm text[],
     status text,
+    message text,
     params jsonb,
+    "objectId" text NOT NULL,
     "createdAt" timestamp with time zone,
     "updatedAt" timestamp with time zone,
-    _rperm text[],
-    "finishedAt" timestamp with time zone,
-    source text,
-    "objectId" text NOT NULL,
-    "jobName" text,
-    message text,
-    _wperm text[]
+    _wperm text[],
+    "finishedAt" timestamp with time zone
 );
 
 
@@ -191,25 +191,25 @@ ALTER TABLE public."_Join:users:_Role" OWNER TO postgres;
 --
 
 CREATE TABLE public."_PushStatus" (
-    query text,
-    "numSent" double precision,
-    "failedPerType" jsonb,
-    expiry double precision,
     "createdAt" timestamp with time zone,
-    payload text,
-    status text,
-    "objectId" text NOT NULL,
-    "updatedAt" timestamp with time zone,
-    "numFailed" double precision,
-    "pushTime" text,
+    "failedPerType" jsonb,
     source text,
+    "pushTime" text,
+    query text,
+    status text,
     "errorMessage" jsonb,
-    _rperm text[],
+    "objectId" text NOT NULL,
+    payload text,
     title text,
-    "pushHash" text,
     _wperm text[],
+    "numFailed" double precision,
     count double precision,
-    "sentPerType" jsonb
+    expiry double precision,
+    "numSent" double precision,
+    "pushHash" text,
+    "sentPerType" jsonb,
+    _rperm text[],
+    "updatedAt" timestamp with time zone
 );
 
 
@@ -220,12 +220,12 @@ ALTER TABLE public."_PushStatus" OWNER TO postgres;
 --
 
 CREATE TABLE public."_Role" (
+    _wperm text[],
+    "objectId" text NOT NULL,
     "createdAt" timestamp with time zone,
     "updatedAt" timestamp with time zone,
-    name text,
-    _wperm text[],
     _rperm text[],
-    "objectId" text NOT NULL
+    name text
 );
 
 
@@ -249,23 +249,23 @@ ALTER TABLE public."_SCHEMA" OWNER TO postgres;
 --
 
 CREATE TABLE public."_User" (
-    _perishable_token text,
     "objectId" text NOT NULL,
+    "createdAt" timestamp with time zone,
     _rperm text[],
-    "emailVerified" boolean,
-    _hashed_password text,
+    email text,
     _wperm text[],
+    _email_verify_token text,
+    _hashed_password text,
+    "authData" jsonb,
+    _perishable_token text,
+    _perishable_token_expires_at timestamp with time zone,
+    username text,
+    "emailVerified" boolean,
+    _email_verify_token_expires_at timestamp with time zone,
     _failed_login_count double precision,
     _password_history jsonb,
     "updatedAt" timestamp with time zone,
-    "authData" jsonb,
-    username text,
-    _email_verify_token_expires_at timestamp with time zone,
     _account_lockout_expires_at timestamp with time zone,
-    _perishable_token_expires_at timestamp with time zone,
-    "createdAt" timestamp with time zone,
-    email text,
-    _email_verify_token text,
     _password_changed_at timestamp with time zone
 );
 
@@ -277,14 +277,14 @@ ALTER TABLE public."_User" OWNER TO postgres;
 --
 
 CREATE TABLE public."returnPack" (
+    "objectId" text NOT NULL,
     "createdAt" timestamp with time zone,
     "updatedAt" timestamp with time zone,
     _rperm text[],
-    "objectId" text NOT NULL,
     _wperm text[],
-    imaginary double precision,
     "real" double precision,
-    "errorMsg" text
+    "errorMsg" text,
+    imaginary double precision
 );
 
 
@@ -310,7 +310,7 @@ COPY public."_Hooks" ("triggerName", url, "functionName", "className") FROM stdi
 -- Data for Name: _JobStatus; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."_JobStatus" (status, params, "createdAt", "updatedAt", _rperm, "finishedAt", source, "objectId", "jobName", message, _wperm) FROM stdin;
+COPY public."_JobStatus" ("jobName", source, _rperm, status, message, params, "objectId", "createdAt", "updatedAt", _wperm, "finishedAt") FROM stdin;
 \.
 
 
@@ -334,7 +334,7 @@ COPY public."_Join:users:_Role" ("relatedId", "owningId") FROM stdin;
 -- Data for Name: _PushStatus; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."_PushStatus" (query, "numSent", "failedPerType", expiry, "createdAt", payload, status, "objectId", "updatedAt", "numFailed", "pushTime", source, "errorMessage", _rperm, title, "pushHash", _wperm, count, "sentPerType") FROM stdin;
+COPY public."_PushStatus" ("createdAt", "failedPerType", source, "pushTime", query, status, "errorMessage", "objectId", payload, title, _wperm, "numFailed", count, expiry, "numSent", "pushHash", "sentPerType", _rperm, "updatedAt") FROM stdin;
 \.
 
 
@@ -342,7 +342,7 @@ COPY public."_PushStatus" (query, "numSent", "failedPerType", expiry, "createdAt
 -- Data for Name: _Role; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."_Role" ("createdAt", "updatedAt", name, _wperm, _rperm, "objectId") FROM stdin;
+COPY public."_Role" (_wperm, "objectId", "createdAt", "updatedAt", _rperm, name) FROM stdin;
 \.
 
 
@@ -361,7 +361,7 @@ returnPack	{"fields": {"real": {"type": "Number"}, "_rperm": {"type": "Array"}, 
 -- Data for Name: _User; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."_User" (_perishable_token, "objectId", _rperm, "emailVerified", _hashed_password, _wperm, _failed_login_count, _password_history, "updatedAt", "authData", username, _email_verify_token_expires_at, _account_lockout_expires_at, _perishable_token_expires_at, "createdAt", email, _email_verify_token, _password_changed_at) FROM stdin;
+COPY public."_User" ("objectId", "createdAt", _rperm, email, _wperm, _email_verify_token, _hashed_password, "authData", _perishable_token, _perishable_token_expires_at, username, "emailVerified", _email_verify_token_expires_at, _failed_login_count, _password_history, "updatedAt", _account_lockout_expires_at, _password_changed_at) FROM stdin;
 \.
 
 
@@ -369,8 +369,8 @@ COPY public."_User" (_perishable_token, "objectId", _rperm, "emailVerified", _ha
 -- Data for Name: returnPack; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."returnPack" ("createdAt", "updatedAt", _rperm, "objectId", _wperm, imaginary, "real", "errorMsg") FROM stdin;
-2018-07-23 22:04:23.423+08	2018-07-23 22:04:23.423+08	\N	5b55e0671d41c80f7eec4e07	\N	0	11	Good
+COPY public."returnPack" ("objectId", "createdAt", "updatedAt", _rperm, _wperm, "real", "errorMsg", imaginary) FROM stdin;
+5b606e7e1d41c8102e02443b	2018-07-31 22:13:18.559+08	2018-07-31 22:13:18.559+08	\N	\N	2	Good	0
 \.
 
 
