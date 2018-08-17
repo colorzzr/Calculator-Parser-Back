@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.5.13
--- Dumped by pg_dump version 9.5.13
+-- Dumped from database version 9.5.14
+-- Dumped by pg_dump version 9.5.14
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -284,7 +284,9 @@ CREATE TABLE public."returnPack" (
     _wperm text[],
     "real" double precision,
     "errorMsg" text,
-    imaginary double precision
+    imaginary double precision,
+    "operationMode" double precision,
+    date text
 );
 
 
@@ -353,7 +355,7 @@ COPY public."_Role" (_wperm, "objectId", "createdAt", "updatedAt", _rperm, name)
 COPY public."_SCHEMA" ("className", schema, "isParseClass") FROM stdin;
 _User	{"fields": {"email": {"type": "String"}, "_rperm": {"type": "Array"}, "_wperm": {"type": "Array"}, "authData": {"type": "Object"}, "objectId": {"type": "String"}, "username": {"type": "String"}, "createdAt": {"type": "Date"}, "updatedAt": {"type": "Date"}, "emailVerified": {"type": "Boolean"}, "_hashed_password": {"type": "String"}}, "className": "_User", "classLevelPermissions": null}	t
 _Role	{"fields": {"name": {"type": "String"}, "roles": {"type": "Relation", "targetClass": "_Role"}, "users": {"type": "Relation", "targetClass": "_User"}, "_rperm": {"type": "Array"}, "_wperm": {"type": "Array"}, "objectId": {"type": "String"}, "createdAt": {"type": "Date"}, "updatedAt": {"type": "Date"}}, "className": "_Role", "classLevelPermissions": null}	t
-returnPack	{"fields": {"real": {"type": "Number"}, "_rperm": {"type": "Array"}, "_wperm": {"type": "Array"}, "errorMsg": {"type": "String"}, "objectId": {"type": "String"}, "createdAt": {"type": "Date"}, "imaginary": {"type": "Number"}, "updatedAt": {"type": "Date"}}, "className": "returnPack", "classLevelPermissions": null}	t
+returnPack	{"fields": {"date": {"type": "String"}, "real": {"type": "Number"}, "_rperm": {"type": "Array"}, "_wperm": {"type": "Array"}, "errorMsg": {"type": "String"}, "objectId": {"type": "String"}, "createdAt": {"type": "Date"}, "imaginary": {"type": "Number"}, "updatedAt": {"type": "Date"}, "operationMode": {"type": "Number"}}, "className": "returnPack", "classLevelPermissions": null}	t
 \.
 
 
@@ -369,8 +371,8 @@ COPY public."_User" ("objectId", "createdAt", _rperm, email, _wperm, _email_veri
 -- Data for Name: returnPack; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."returnPack" ("objectId", "createdAt", "updatedAt", _rperm, _wperm, "real", "errorMsg", imaginary) FROM stdin;
-5b606e7e1d41c8102e02443b	2018-07-31 22:13:18.559+08	2018-07-31 22:13:18.559+08	\N	\N	2	Good	0
+COPY public."returnPack" ("objectId", "createdAt", "updatedAt", _rperm, _wperm, "real", "errorMsg", imaginary, "operationMode", date) FROM stdin;
+5b7720ed1d41c84d83e79359	2018-08-18 03:24:29.552+08	2018-08-18 03:24:29.552+08	\N	\N	242	Good	0	0	2018-August-18
 \.
 
 
